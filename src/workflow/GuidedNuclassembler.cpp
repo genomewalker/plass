@@ -166,7 +166,7 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command)
     }
     else
     {
-        cmd.addVariable("KMERMATCHER_PAR", par.createParameterString(par.prefilter).c_str());
+        cmd.addVariable("PREFILTER_PAR", par.createParameterString(par.prefilter).c_str());
     }
 
     // # 2. Rescore diagonal
