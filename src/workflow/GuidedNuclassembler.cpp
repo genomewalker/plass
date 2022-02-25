@@ -7,12 +7,13 @@
 
 #include "guidedNuclAssemble.sh.h"
 
-void setGuidedNuclAssemblerWorkflowDefaults(LocalParameters *p) {
+void setGuidedNuclAssemblerWorkflowDefaults(LocalParameters *p)
+{
 
-    p->multiNumIterations = MultiParam<int>(5,5);
-    p->multiKmerSize = MultiParam<int>(14,22);
-    p->multiSeqIdThr = MultiParam<float>(0.97,0.99);
-    p->alphabetSize = MultiParam<int>(13,5);
+    p->multiNumIterations = MultiParam<int>(5, 5);
+    p->multiKmerSize = MultiParam<int>(14, 22);
+    p->multiSeqIdThr = MultiParam<float>(0.97, 0.99);
+    p->alphabetSize = MultiParam<int>(13, 5);
 
     p->orfMinLength = 45;
     p->covThr = 0.00;
@@ -30,7 +31,7 @@ void setGuidedNuclAssemblerWorkflowDefaults(LocalParameters *p) {
     p->cycleCheck = true;
     p->chopCycle = true;
 
-    //cluster defaults for redundancy reduction
+    // cluster defaults for redundancy reduction
     p->covMode = 1;
     p->clustSeqIdThr = 0.97;
     p->clustCovThr = 0.99;
@@ -40,7 +41,8 @@ void setGuidedNuclAssemblerWorkflowDefaults(LocalParameters *p) {
     p->zdrop = 200;
 }
 
-int guidedNuclAssemble(int argc, const char **argv, const Command &command) {
+int guidedNuclAssemble(int argc, const char **argv, const Command &command)
+{
     LocalParameters &par = LocalParameters::getLocalInstance();
     setGuidedNuclAssemblerWorkflowDefaults(&par);
 
@@ -51,7 +53,7 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command) {
     par.overrideParameterDescription(par.PARAM_ZDROP, "Maximal allowed difference between score values before alignment is truncated (only for clustering)", NULL, 0);
 
     // make parameter visible in short help
-    par.overrideParameterDescription( par.PARAM_MAX_SEQ_LEN, NULL, NULL, MMseqsParameter::COMMAND_COMMON);
+    par.overrideParameterDescription(par.PARAM_MAX_SEQ_LEN, NULL, NULL, MMseqsParameter::COMMAND_COMMON);
 
     // hide this parameters (changing them would lead to unexpected behavior)
     par.PARAM_C.replaceCategory(MMseqsParameter::COMMAND_HIDDEN);
@@ -82,14 +84,19 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command) {
 
     par.parseParameters(argc, argv, command, true, Parameters::PARSE_VARIADIC, 0);
     CommandCaller cmd;
-    if(par.filenames.size() < 3) {
+    if (par.filenames.size() < 3)
+    {
         Debug(Debug::ERROR) << "Too few input files provided.\n";
         return EXIT_FAILURE;
     }
-    else if ((par.filenames.size() - 2) % 2 == 0) {
+    else if ((par.filenames.size() - 2) % 2 == 0)
+    {
         cmd.addVariable("PAIRED_END", "1"); // paired end reads
-    } else {
-        if (par.filenames.size() != 3) {
+    }
+    else
+    {
+        if (par.filenames.size() != 3)
+        {
             Debug(Debug::ERROR) << "Too many input files provided.\n";
             Debug(Debug::ERROR) << "For paired-end input provide READSETA_1.fastq READSETA_2.fastq ... OUTPUT.fasta tmpDir\n";
             Debug(Debug::ERROR) << "For single input use READSET.fast(q|a) OUTPUT.fasta tmpDir\n";
@@ -98,16 +105,17 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command) {
         cmd.addVariable("PAIRED_END", NULL); // single end reads
     }
 
-
     std::string tmpDir = par.filenames.back();
     std::string hash = SSTR(par.hashParameter(command.databases, par.filenames, *command.params));
-    if (par.reuseLatest) {
+    if (par.reuseLatest)
+    {
         hash = FileUtil::getHashFromSymLink(tmpDir + "/latest");
     }
     tmpDir = FileUtil::createTemporaryDirectory(tmpDir, hash);
 
     char *p = realpath(tmpDir.c_str(), NULL);
-    if (p == NULL) {
+    if (p == NULL)
+    {
         Debug(Debug::ERROR) << "Could not get real path of " << tmpDir << "!\n";
         EXIT(EXIT_FAILURE);
     }
@@ -120,6 +128,7 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command) {
 
     cmd.addVariable("REMOVE_TMP", par.removeTmpFiles ? "TRUE" : NULL);
     cmd.addVariable("REMOVE_INCREMENTAL_TMP", par.deleteFilesInc ? "TRUE" : NULL);
+    cmd.addVariable("USE_PREFILTER", par.usePrefilter ? "TRUE" : NULL);
     cmd.addVariable("RUNNER", par.runner.c_str());
 
     // set values for protein level assembly
@@ -150,7 +159,15 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command) {
     par.includeOnlyExtendable = true;
 
     // # 1. Finding exact $k$-mer matches.
-    cmd.addVariable("KMERMATCHER_PAR", par.createParameterString(par.kmermatcher).c_str());
+
+    if (par.usePrefilter == 0)
+    {
+        cmd.addVariable("KMERMATCHER_PAR", par.createParameterString(par.kmermatcher).c_str());
+    }
+    else
+    {
+        cmd.addVariable("KMERMATCHER_PAR", par.createParameterString(par.prefilter).c_str());
+    }
 
     // # 2. Rescore diagonal
     par.filterHits = false;
