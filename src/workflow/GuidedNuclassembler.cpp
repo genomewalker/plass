@@ -136,6 +136,8 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command)
     par.kmerSize = par.multiKmerSize.aminoacids;
     par.seqIdThr = par.multiSeqIdThr.aminoacids;
     par.alnLenThr = par.multiAlnLenThr.aminoacids;
+    par.spacedKmer = par.multiSpacedKmer.aminoacids;
+    par.spacedKmerPattern = par.multiSpacedKmerPattern.aminoacids;
     cmd.addVariable("NUM_IT", SSTR(par.numIterations).c_str());
 
     // # 0. Extract ORFs
@@ -184,6 +186,8 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command)
     par.kmerSize = par.multiKmerSize.nucleotides;
     par.seqIdThr = par.multiSeqIdThr.nucleotides;
     par.alnLenThr = par.multiAlnLenThr.nucleotides;
+    par.spacedKmer = par.multiSpacedKmer.nucleotides;
+    par.spacedKmerPattern = par.multiSpacedKmerPattern.nucleotides;
     par.addBacktrace = addBacktrace;
     par.dbMode = true;
     cmd.addVariable("NUCL_ASM_PAR", par.createParameterString(par.nuclassembleworkflow).c_str());

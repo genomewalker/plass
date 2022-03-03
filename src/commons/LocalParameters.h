@@ -50,6 +50,8 @@ public:
     MultiParam<int> multiKmerSize;
     MultiParam<int> multiAlnLenThr;
     MultiParam<float> multiSeqIdThr;
+    MultiParam<int> multiSpacedKmer;
+    MultiParam<char *> multiSpacedKmerPattern;
 
     PARAMETER(PARAM_FILTER_PROTEINS)
     PARAMETER(PARAM_PROTEIN_FILTER_THRESHOLD)
@@ -65,6 +67,8 @@ public:
     PARAMETER(PARAM_MULTI_MIN_ALN_LEN)
     PARAMETER(PARAM_DB_MODE)
     PARAMETER(PARAM_USE_PREFILTER)
+    PARAMETER(PARAM_MULTI_SPACED_KMER_MODE)
+    PARAMETER(PARAM_MULTI_SPACED_KMER_PATTERN)
 
 private:
     LocalParameters() : Parameters(),
@@ -72,6 +76,8 @@ private:
                         multiKmerSize(INT_MAX, INT_MAX),
                         multiAlnLenThr(INT_MAX, INT_MAX),
                         multiSeqIdThr(FLT_MAX, FLT_MAX),
+                        multiSpacedKmer(INT_MAX, INT_MAX),
+                        multiSpacedKmerPattern("", ""),
                         PARAM_FILTER_PROTEINS(PARAM_FILTER_PROTEINS_ID, "--filter-proteins", "Filter Proteins", "filter proteins by a neural network [0,1]", typeid(int), (void *)&filterProteins, "^[0-1]{1}$"),
                         PARAM_PROTEIN_FILTER_THRESHOLD(PARAM_PROTEIN_FILTER_THRESHOLD_ID, "--protein-filter-threshold", "Protein Filter Threshold", "filter proteins lower than threshold [0.0,1.0]", typeid(float), (void *)&proteinFilterThreshold, "^0(\\.[0-9]+)?|1(\\.0+)?$"),
                         PARAM_DELETE_TMP_INC(PARAM_DELETE_TMP_INC_ID, "--delete-tmp-inc", "Delete temporary files incremental", "Delete temporary files incremental [0,1]", typeid(int), (void *)&deleteFilesInc, "^[0-1]{1}$", MMseqsParameter::COMMAND_COMMON | MMseqsParameter::COMMAND_EXPERT),
@@ -85,7 +91,9 @@ private:
                         PARAM_MULTI_MIN_SEQ_ID(PARAM_MULTI_MIN_SEQ_ID_ID, "--min-seq-id", "Seq. id. threshold", "Overlap sequence identity threshold [0.0, 1.0]", typeid(MultiParam<float>), (void *)&multiSeqIdThr, "", MMseqsParameter::COMMAND_ALIGN),
                         PARAM_MULTI_MIN_ALN_LEN(PARAM_MULTI_MIN_ALN_LEN_ID, "--min-aln-len", "Min alignment length", "Minimum alignment length (range 0-INT_MAX)", typeid(MultiParam<int>), (void *)&multiAlnLenThr, "", MMseqsParameter::COMMAND_ALIGN),
                         PARAM_DB_MODE(PARAM_DB_MODE_ID, "--db-mode", "Input is database", "Input is database", typeid(bool), (void *)&dbMode, "", MMseqsParameter::COMMAND_EXPERT),
-                        PARAM_USE_PREFILTER(PARAM_USE_PREFILTER_ID, "--use-prefilter", "Use prefilter for assembly", "Use prefilter to assemble super short reads [0,1]", typeid(int), (void *)&usePrefilter, "^[0-1]{1}$", MMseqsParameter::COMMAND_EXPERT)
+                        PARAM_USE_PREFILTER(PARAM_USE_PREFILTER_ID, "--use-prefilter", "Use prefilter for assembly", "Use prefilter to assemble super short reads [0,1]", typeid(int), (void *)&usePrefilter, "^[0-1]{1}$", MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_MULTI_SPACED_KMER_MODE(PARAM_MULTI_SPACED_KMER_MODE_ID, "--spaced-kmer-mode", "Spaced k-mers", "0: use consecutive positions in k-mers; 1: use spaced k-mers", typeid(MultiParam<int>), (void *)&multiSpacedKmer, "^[0-1]{1}", MMseqsParameter::COMMAND_PREFILTER | MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_MULTI_SPACED_KMER_PATTERN(PARAM_MULTI_SPACED_KMER_PATTERN_ID, "--spaced-kmer-pattern", "User-specified spaced k-mer pattern", "User-specified spaced k-mer pattern", typeid(MultiParam<char *>), (void *)&multiSpacedKmerPattern, "", MMseqsParameter::COMMAND_PREFILTER | MMseqsParameter::COMMAND_EXPERT)
     {
 
         // assembleresult
@@ -185,6 +193,10 @@ private:
         guidedNuclAssembleworkflow.push_back(&PARAM_MULTI_MIN_ALN_LEN);
         guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_NUM_ITERATIONS);
         guidedNuclAssembleworkflow.push_back(&PARAM_MULTI_NUM_ITERATIONS);
+        guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_SPACED_KMER_MODE);
+        guidedNuclAssembleworkflow.push_back(&PARAM_MULTI_SPACED_KMER_MODE);
+        guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_SPACED_KMER_PATTERN);
+        guidedNuclAssembleworkflow.push_back(&PARAM_MULTI_SPACED_KMER_PATTERN);
 
         filterProteins = 1;
         deleteFilesInc = 1;
