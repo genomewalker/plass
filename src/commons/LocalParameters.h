@@ -213,6 +213,7 @@ private:
         multiKmerSize = MultiParam<int>(14, 22);
         multiAlnLenThr = MultiParam<int>(0, 0);
         multiSeqIdThr = MultiParam<float>(0.97, 0.97);
+        multiSpacedKmer = MultiParam<int>(0, 0);
     }
     LocalParameters(LocalParameters const &);
     ~LocalParameters(){};
