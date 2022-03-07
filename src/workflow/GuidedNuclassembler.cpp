@@ -130,7 +130,6 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command)
     cmd.addVariable("REMOVE_INCREMENTAL_TMP", par.deleteFilesInc ? "TRUE" : NULL);
     cmd.addVariable("USE_PREFILTER", par.usePrefilter ? "TRUE" : NULL);
     cmd.addVariable("RUNNER", par.runner.c_str());
-
     // set values for protein level assembly
     par.numIterations = par.multiNumIterations.aminoacids;
     par.kmerSize = par.multiKmerSize.aminoacids;
@@ -138,6 +137,7 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command)
     par.alnLenThr = par.multiAlnLenThr.aminoacids;
     par.spacedKmer = par.multiSpacedKmer.aminoacids;
     par.spacedKmerPattern = par.multiSpacedKmerPattern.aminoacids;
+    cmd.addVariable("PREF_NUM_IT", SSTR(par.prefilterNumIterations).c_str());
     cmd.addVariable("NUM_IT", SSTR(par.numIterations).c_str());
 
     // # 0. Extract ORFs
@@ -168,6 +168,7 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command)
     }
     else
     {
+        cmd.addVariable("KMERMATCHER_PAR", par.createParameterString(par.kmermatcher).c_str());
         cmd.addVariable("PREFILTER_PAR", par.createParameterString(par.prefilter).c_str());
     }
 

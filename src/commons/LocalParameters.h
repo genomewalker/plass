@@ -39,6 +39,7 @@ public:
     int deleteFilesInc;
     int minContigLen;
     int usePrefilter;
+    int prefilterNumIterations;
     float clustSeqIdThr;
     float clustCovThr;
     float proteinFilterThreshold;
@@ -67,6 +68,7 @@ public:
     PARAMETER(PARAM_MULTI_MIN_ALN_LEN)
     PARAMETER(PARAM_DB_MODE)
     PARAMETER(PARAM_USE_PREFILTER)
+    PARAMETER(PARAM_PREFILTER_NUM_ITERATIONS)
     PARAMETER(PARAM_MULTI_SPACED_KMER_MODE)
     PARAMETER(PARAM_MULTI_SPACED_KMER_PATTERN)
 
@@ -92,6 +94,7 @@ private:
                         PARAM_MULTI_MIN_ALN_LEN(PARAM_MULTI_MIN_ALN_LEN_ID, "--min-aln-len", "Min alignment length", "Minimum alignment length (range 0-INT_MAX)", typeid(MultiParam<int>), (void *)&multiAlnLenThr, "", MMseqsParameter::COMMAND_ALIGN),
                         PARAM_DB_MODE(PARAM_DB_MODE_ID, "--db-mode", "Input is database", "Input is database", typeid(bool), (void *)&dbMode, "", MMseqsParameter::COMMAND_EXPERT),
                         PARAM_USE_PREFILTER(PARAM_USE_PREFILTER_ID, "--use-prefilter", "Use prefilter for assembly", "Use prefilter to assemble super short reads [0,1]", typeid(int), (void *)&usePrefilter, "^[0-1]{1}$", MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_PREFILTER_NUM_ITERATIONS(PARAM_PREFILTER_NUM_ITERATIONS_ID, "--prefilter-iterations", "Number of assemly iteration using the prefilter", "Number of assembly iterations using the prefilter before changing to kmermatcher", typeid(int), (void *)&prefilterNumIterations, "^[1-9]{1}[0-9]*$", MMseqsParameter::COMMAND_EXPERT),
                         PARAM_MULTI_SPACED_KMER_MODE(PARAM_MULTI_SPACED_KMER_MODE_ID, "--spaced-kmer-mode", "Spaced k-mers", "0: use consecutive positions in k-mers; 1: use spaced k-mers", typeid(MultiParam<int>), (void *)&multiSpacedKmer, "^[0-1]{1}", MMseqsParameter::COMMAND_PREFILTER | MMseqsParameter::COMMAND_EXPERT),
                         PARAM_MULTI_SPACED_KMER_PATTERN(PARAM_MULTI_SPACED_KMER_PATTERN_ID, "--spaced-kmer-pattern", "User-specified spaced k-mer pattern", "User-specified spaced k-mer pattern", typeid(MultiParam<char *>), (void *)&multiSpacedKmerPattern, "", MMseqsParameter::COMMAND_PREFILTER | MMseqsParameter::COMMAND_EXPERT)
     {
@@ -176,6 +179,7 @@ private:
         guidedassembleresults.push_back(&PARAM_THREADS);
         guidedassembleresults.push_back(&PARAM_V);
         guidedassembleresults.push_back(&PARAM_USE_PREFILTER);
+        guidedassembleresults.push_back(&PARAM_PREFILTER_NUM_ITERATIONS);
 
         // guidedNuclAssembleworkflow
         guidedNuclAssembleworkflow = combineList(extractorfs, guidedassembleresults);
@@ -208,6 +212,7 @@ private:
         chopCycle = true;
         cycleCheck = true;
         dbMode = false;
+        prefilterNumIterations = 3;
 
         multiNumIterations = MultiParam<int>(5, 5);
         multiKmerSize = MultiParam<int>(14, 22);
