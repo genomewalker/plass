@@ -1,23 +1,20 @@
 #ifndef LOCALPARAMETERS_H
 #define LOCALPARAMETERS_H
 
-#include <Parameters.h>
 #include <MultiParam.h>
+#include <Parameters.h>
+
 #include <algorithm>
 #include <cfloat>
 
-class LocalParameters : public Parameters
-{
-public:
-    static void initInstance()
-    {
+class LocalParameters : public Parameters {
+   public:
+    static void initInstance() {
         new LocalParameters;
     }
 
-    static LocalParameters &getLocalInstance()
-    {
-        if (instance == NULL)
-        {
+    static LocalParameters &getLocalInstance() {
+        if (instance == NULL) {
             initInstance();
         }
         return static_cast<LocalParameters &>(LocalParameters::getInstance());
@@ -72,7 +69,7 @@ public:
     PARAMETER(PARAM_MULTI_SPACED_KMER_MODE)
     PARAMETER(PARAM_MULTI_SPACED_KMER_PATTERN)
 
-private:
+   private:
     LocalParameters() : Parameters(),
                         multiNumIterations(INT_MAX, INT_MAX),
                         multiKmerSize(INT_MAX, INT_MAX),
@@ -96,16 +93,14 @@ private:
                         PARAM_USE_PREFILTER(PARAM_USE_PREFILTER_ID, "--use-prefilter", "Use prefilter for assembly", "Use prefilter to assemble super short reads [0,1]", typeid(int), (void *)&usePrefilter, "^[0-1]{1}$", MMseqsParameter::COMMAND_EXPERT),
                         PARAM_PREFILTER_NUM_ITERATIONS(PARAM_PREFILTER_NUM_ITERATIONS_ID, "--prefilter-iterations", "Number of assemly iteration using the prefilter", "Number of assembly iterations using the prefilter before changing to kmermatcher", typeid(int), (void *)&prefilterNumIterations, "^[1-9]{1}[0-9]*$", MMseqsParameter::COMMAND_EXPERT),
                         PARAM_MULTI_SPACED_KMER_MODE(PARAM_MULTI_SPACED_KMER_MODE_ID, "--spaced-kmer-mode", "Spaced k-mers", "0: use consecutive positions in k-mers; 1: use spaced k-mers", typeid(MultiParam<int>), (void *)&multiSpacedKmer, "^[0-1]{1}", MMseqsParameter::COMMAND_PREFILTER | MMseqsParameter::COMMAND_EXPERT),
-                        PARAM_MULTI_SPACED_KMER_PATTERN(PARAM_MULTI_SPACED_KMER_PATTERN_ID, "--spaced-kmer-pattern", "User-specified spaced k-mer pattern", "User-specified spaced k-mer pattern", typeid(MultiParam<char *>), (void *)&multiSpacedKmerPattern, "", MMseqsParameter::COMMAND_PREFILTER | MMseqsParameter::COMMAND_EXPERT)
-    {
-
+                        PARAM_MULTI_SPACED_KMER_PATTERN(PARAM_MULTI_SPACED_KMER_PATTERN_ID, "--spaced-kmer-pattern", "User-specified spaced k-mer pattern", "User-specified spaced k-mer pattern", typeid(MultiParam<char *>), (void *)&multiSpacedKmerPattern, "", MMseqsParameter::COMMAND_PREFILTER | MMseqsParameter::COMMAND_EXPERT) {
         // assembleresult
         assembleresults.push_back(&PARAM_MIN_SEQ_ID);
         assembleresults.push_back(&PARAM_MAX_SEQ_LEN);
         assembleresults.push_back(&PARAM_THREADS);
         assembleresults.push_back(&PARAM_V);
         assembleresults.push_back(
-            &PARAM_RESCORE_MODE); // temporary added until assemble and nuclassemble use same rescoremode
+            &PARAM_RESCORE_MODE);  // temporary added until assemble and nuclassemble use same rescoremode
 
         extractorfssubset.push_back(&PARAM_TRANSLATION_TABLE);
         extractorfssubset.push_back(&PARAM_USE_ALL_TABLE_STARTS);
