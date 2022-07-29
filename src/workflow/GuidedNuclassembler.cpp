@@ -154,6 +154,9 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command) {
         cmd.addVariable("KMERMATCHER_PAR", par.createParameterString(par.kmermatcher).c_str());
     } else {
         cmd.addVariable("KMERMATCHER_PAR", par.createParameterString(par.kmermatcher).c_str());
+        par.scoringMatrixFile = par.prefilterScoringMatrixFile;
+        par.spacedKmer = par.prefilterSpacedKmer;
+        par.spacedKmerPattern = par.prefilterSpacedKmerPattern;
         cmd.addVariable("PREFILTER_PAR", par.createParameterString(par.prefilter).c_str());
     }
 

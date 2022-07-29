@@ -76,13 +76,18 @@ if [ -z "$NUM_IT" ]; then
     NUM_IT=1
 fi
 
+if [ -n "${USE_PREFILTER}" ]; then
+    NUM_IT="$((NUM_IT + PREF_NUM_IT))"
+    printf "\nUSING PREFILTER: NUM_IT = %s\n" "${PREF_NUM_IT}"
+fi
+
 while [ $STEP -lt $NUM_IT ]; do
     echo "STEP: $STEP"
 
     # 1. Finding exact $k$-mer matches.
     if notExists "${TMP_PATH_GUIDED_ASSEMBLY}/pref_$STEP.done"; then
         # shellcheck disable=SC2086
-        if [ -n "$USE_PREFILTER" ] && [ $STEP -lt "$PREF_NUM_IT" ]; then
+        if [ -n "${USE_PREFILTER}" ] && [ $STEP -lt "${PREF_NUM_IT}" ]; then
             "$MMSEQS" prefilter "$INPUT_AA" "$INPUT_AA" "${TMP_PATH_GUIDED_ASSEMBLY}/pref_$STEP" ${PREFILTER_PAR} ||
                 fail "Prefilter step died"
         else
