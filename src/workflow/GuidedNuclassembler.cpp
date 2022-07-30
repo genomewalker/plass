@@ -36,6 +36,7 @@ void setGuidedNuclAssemblerWorkflowDefaults(LocalParameters *p) {
     p->gapOpen = 5;
     p->gapExtend = 2;
     p->zdrop = 200;
+    
 }
 
 int guidedNuclAssemble(int argc, const char **argv, const Command &command) {
@@ -149,16 +150,8 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command) {
     par.includeOnlyExtendable = true;
 
     // # 1. Finding exact $k$-mer matches.
-
-    if (par.usePrefilter == 0) {
-        cmd.addVariable("KMERMATCHER_PAR", par.createParameterString(par.kmermatcher).c_str());
-    } else {
-        cmd.addVariable("KMERMATCHER_PAR", par.createParameterString(par.kmermatcher).c_str());
-        par.scoringMatrixFile = par.prefilterScoringMatrixFile;
-        par.spacedKmer = par.prefilterSpacedKmer;
-        par.spacedKmerPattern = par.prefilterSpacedKmerPattern;
-        cmd.addVariable("PREFILTER_PAR", par.createParameterString(par.prefilter).c_str());
-    }
+        
+    cmd.addVariable("KMERMATCHER_PAR", par.createParameterString(par.kmermatcher).c_str());
 
     // # 2. Rescore diagonal
     par.filterHits = false;
@@ -190,6 +183,19 @@ int guidedNuclAssemble(int argc, const char **argv, const Command &command) {
 
     cmd.addVariable("THREADS_PAR", par.createParameterString(par.onlythreads).c_str());
     cmd.addVariable("VERBOSITY_PAR", par.createParameterString(par.onlyverbosity).c_str());
+
+    if (par.usePrefilter == 1) {
+        par.scoringMatrixFile = par.prefilterScoringMatrixFile;
+        par.spacedKmer = par.prefilterSpacedKmer;
+        par.spacedKmerPattern = par.prefilterSpacedKmerPattern;
+        par.kmerSize = par.prefilterKmerSize;
+        par.sensitivity = par.prefilterSensitivity;
+        par.exactKmerMatching = par.prefilterExactKmerMatching;
+        par.maskMode = par.prefilterMaskMode;
+        par.compBiasCorrection = par.prefilterCompBiasCorrection;
+        par.maxResListLen = par.prefilterMaxResListLen;
+        cmd.addVariable("PREFILTER_PAR", par.createParameterString(par.prefilter).c_str());
+    }
 
     FileUtil::writeFile(tmpDir + "/guidedNuclAssemble.sh", guidedNuclAssemble_sh, guidedNuclAssemble_sh_len);
     std::string program(tmpDir + "/guidedNuclAssemble.sh");

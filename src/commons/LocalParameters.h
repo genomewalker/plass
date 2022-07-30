@@ -45,6 +45,13 @@ class LocalParameters : public Parameters {
     bool dbMode;
     int prefilterSpacedKmer;
     std::string prefilterSpacedKmerPattern;
+    int prefilterExactKmerMatching;
+    int prefilterMaskMode;
+    int prefilterCompBiasCorrection;
+    float prefilterSensitivity;
+    int prefilterKmerSize;
+    size_t prefilterMaxResListLen;                // Maximal result list length per query
+
 
     MultiParam<char*> prefilterScoringMatrixFile;       // path to scoring matrix
     MultiParam<int> multiNumIterations;
@@ -70,8 +77,14 @@ class LocalParameters : public Parameters {
     PARAMETER(PARAM_USE_PREFILTER)
     PARAMETER(PARAM_PREFILTER_NUM_ITERATIONS)
     PARAMETER(PARAM_PREFILTER_SUB_MAT)
+    PARAMETER(PARAM_PREFILTER_S)
+    PARAMETER(PARAM_PREFILTER_K)
     PARAMETER(PARAM_PREFILTER_SPACED_KMER_MODE)
     PARAMETER(PARAM_PREFILTER_SPACED_KMER_PATTERN)
+    PARAMETER(PARAM_PREFILTER_EXACT_KMER_MATCHING)
+    PARAMETER(PARAM_PREFILTER_MASK_RESIDUES)
+    PARAMETER(PARAM_PREFILTER_NO_COMP_BIAS_CORR)
+    PARAMETER(PARAM_PREFILTER_MAX_SEQS)
     PARAMETER(PARAM_MULTI_SPACED_KMER_MODE)
     PARAMETER(PARAM_MULTI_SPACED_KMER_PATTERN)
 
@@ -99,9 +112,15 @@ class LocalParameters : public Parameters {
                         PARAM_DB_MODE(PARAM_DB_MODE_ID, "--db-mode", "Input is database", "Input is database", typeid(bool), (void *)&dbMode, "", MMseqsParameter::COMMAND_EXPERT),
                         PARAM_USE_PREFILTER(PARAM_USE_PREFILTER_ID, "--use-prefilter", "Use prefilter for assembly", "Use prefilter to assemble super short reads [0,1]", typeid(int), (void *)&usePrefilter, "^[0-1]{1}$", MMseqsParameter::COMMAND_EXPERT),
                         PARAM_PREFILTER_NUM_ITERATIONS(PARAM_PREFILTER_NUM_ITERATIONS_ID, "--prefilter-iterations", "Number of assemly iteration using the prefilter", "Number of assembly iterations using the prefilter before changing to kmermatcher", typeid(int), (void *)&prefilterNumIterations, "^[1-9]{1}[0-9]*$", MMseqsParameter::COMMAND_EXPERT),
-                        PARAM_PREFILTER_SUB_MAT(PARAM_PREFILTER_SUB_MAT_ID, "--prefilter-sub-mat", "Substitution matrix", "Substitution matrix file", typeid(MultiParam<char*>), (void *) &prefilterScoringMatrixFile, "", MMseqsParameter::COMMAND_EXPERT),
-                        PARAM_PREFILTER_SPACED_KMER_MODE(PARAM_PREFILTER_SPACED_KMER_MODE_ID, "--prefilter-spaced-kmer-mode", "Spaced k-mers", "0: use consecutive positions in k-mers; 1: use spaced k-mers", typeid(int), (void *) &prefilterSpacedKmer, "^[0-1]{1}", MMseqsParameter::COMMAND_EXPERT),
-                        PARAM_PREFILTER_SPACED_KMER_PATTERN(PARAM_PREFILTER_SPACED_KMER_PATTERN_ID, "--prefilter-spaced-kmer-pattern", "Spaced k-mer pattern", "User-specified spaced k-mer pattern", typeid(std::string), (void *) &prefilterSpacedKmerPattern, "^1[01]*1$", MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_PREFILTER_SUB_MAT(PARAM_PREFILTER_SUB_MAT_ID, "--prefilter-sub-mat", "Prefilter substitution matrix", "Substitution matrix file", typeid(MultiParam<char*>), (void *) &prefilterScoringMatrixFile, "", MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_PREFILTER_S(PARAM_PREFILTER_S_ID, "--prefilter-s", "Prefilter sensitivity", "Sensitivity: 1.0 faster; 4.0 fast; 7.5 sensitive", typeid(float), (void *) &prefilterSensitivity, "^[0-9]*(\\.[0-9]+)?$", MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_PREFILTER_K(PARAM_PREFILTER_K_ID, "--prefilter-k", "Prefilter k-mer length", "Prefilter k-mer length (0: automatically set to optimum)", typeid(int), (void *)&prefilterKmerSize, "", MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_PREFILTER_SPACED_KMER_MODE(PARAM_PREFILTER_SPACED_KMER_MODE_ID, "--prefilter-spaced-kmer-mode", "Prefilter spaced k-mers", "0: use consecutive positions in k-mers; 1: use spaced k-mers", typeid(int), (void *) &prefilterSpacedKmer, "^[0-1]{1}", MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_PREFILTER_SPACED_KMER_PATTERN(PARAM_PREFILTER_SPACED_KMER_PATTERN_ID, "--prefilter-spaced-kmer-pattern", "Prefilter user-specified spaced k-mer pattern", "User-specified spaced k-mer pattern", typeid(std::string), (void *) &prefilterSpacedKmerPattern, "^1[01]*1$", MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_PREFILTER_EXACT_KMER_MATCHING(PARAM_PREFILTER_EXACT_KMER_MATCHING_ID, "--prefilter-exact-kmer-matching", "Prefilter exact k-mer matching", "Extract only exact k-mers for matching (range 0-1)", typeid(int), (void *) &prefilterExactKmerMatching, "^[0-1]{1}$", MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_PREFILTER_MASK_RESIDUES(PARAM_PREFILTER_MASK_RESIDUES_ID, "--prefilter-mask", "Prefilter mask residues", "Mask sequences in k-mer stage: 0: w/o low complexity masking, 1: with low complexity masking", typeid(int), (void *) &prefilterMaskMode, "^[0-1]{1}", MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_PREFILTER_NO_COMP_BIAS_CORR(PARAM_PREFILTER_NO_COMP_BIAS_CORR_ID, "--prefilter-comp-bias-corr", "Prefilter compositional bias", "Correct for locally biased amino acid composition (range 0-1)", typeid(int), (void *) &prefilterCompBiasCorrection, "^[0-1]{1}$", MMseqsParameter::COMMAND_EXPERT),
+                        PARAM_PREFILTER_MAX_SEQS(PARAM_PREFILTER_MAX_SEQS_ID, "--prefilter-max-seqs", "Prefilter max results per query", "Maximum results per query sequence allowed to pass the prefilter (affects sensitivity)", typeid(size_t), (void *) &prefilterMaxResListLen, "^[1-9]{1}[0-9]*$", MMseqsParameter::COMMAND_EXPERT),
                         PARAM_MULTI_SPACED_KMER_MODE(PARAM_MULTI_SPACED_KMER_MODE_ID, "--spaced-kmer-mode", "Spaced k-mers", "0: use consecutive positions in k-mers; 1: use spaced k-mers", typeid(MultiParam<int>), (void *)&multiSpacedKmer, "^[0-1]{1}", MMseqsParameter::COMMAND_EXPERT),
                         PARAM_MULTI_SPACED_KMER_PATTERN(PARAM_MULTI_SPACED_KMER_PATTERN_ID, "--spaced-kmer-pattern", "User-specified spaced k-mer pattern", "User-specified spaced k-mer pattern", typeid(MultiParam<char *>), (void *)&multiSpacedKmerPattern, "", MMseqsParameter::COMMAND_EXPERT) {
         // assembleresult
@@ -193,8 +212,14 @@ class LocalParameters : public Parameters {
         guidedNuclAssembleworkflow.push_back(&PARAM_USE_PREFILTER);
         guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_NUM_ITERATIONS);
         guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_SUB_MAT);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_S);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_K);
         guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_SPACED_KMER_MODE);
         guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_SPACED_KMER_PATTERN);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_EXACT_KMER_MATCHING);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_MASK_RESIDUES);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_NO_COMP_BIAS_CORR);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_MAX_SEQS);
 
         // guidedNuclAssembleworkflow special parameter: replace with MultiParam to make aa and nucl values independent
         guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_K);
@@ -207,6 +232,10 @@ class LocalParameters : public Parameters {
         guidedNuclAssembleworkflow.push_back(&PARAM_MULTI_NUM_ITERATIONS);
         guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_PREFILTER_SUB_MAT);
         guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_SUB_MAT);
+        guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_PREFILTER_S);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_S);
+        guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_PREFILTER_K);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_K);
         guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_PREFILTER_SPACED_KMER_MODE);
         guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_SPACED_KMER_MODE);
         guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_PREFILTER_SPACED_KMER_PATTERN);
@@ -215,6 +244,15 @@ class LocalParameters : public Parameters {
         guidedNuclAssembleworkflow.push_back(&PARAM_MULTI_SPACED_KMER_MODE);
         guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_SPACED_KMER_PATTERN);
         guidedNuclAssembleworkflow.push_back(&PARAM_MULTI_SPACED_KMER_PATTERN);
+        guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_PREFILTER_EXACT_KMER_MATCHING);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_EXACT_KMER_MATCHING);
+        guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_PREFILTER_MASK_RESIDUES);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_MASK_RESIDUES);
+        guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_PREFILTER_NO_COMP_BIAS_CORR);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_NO_COMP_BIAS_CORR);
+        guidedNuclAssembleworkflow = removeParameter(guidedNuclAssembleworkflow, PARAM_PREFILTER_MAX_SEQS);
+        guidedNuclAssembleworkflow.push_back(&PARAM_PREFILTER_MAX_SEQS);
+
 
         filterProteins = 1;
         deleteFilesInc = 1;
@@ -228,6 +266,12 @@ class LocalParameters : public Parameters {
         dbMode = false;
         prefilterNumIterations = 3;
         prefilterSpacedKmer = 0;
+        prefilterSensitivity = 4.0;
+        prefilterKmerSize = 14;
+        prefilterMaxResListLen = 300;
+        prefilterExactKmerMatching = false;
+        prefilterMaskMode = false;
+        prefilterCompBiasCorrection = false;
 
         multiNumIterations = MultiParam<int>(5, 5);
         multiKmerSize = MultiParam<int>(14, 22);
